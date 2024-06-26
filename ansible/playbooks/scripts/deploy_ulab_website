@@ -1,0 +1,22 @@
+#!/bin/bash
+
+HOST=$1
+
+if [ -z $HOST ]; then
+	echo -e "Host vide"
+	echo -e "Vous pouvez afficher la commande d'aide à l'aide du paramètre -h ou --help"
+	exit 1
+elif [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+	echo -e "Ce script sert au déploiement de le site ulab sur les hôtes Linux Rocky par l'intermédiaire d'Ansible"
+	echo -e "Utilisation du script : "
+	echo -e "Arg 1 = hôte sur lequel déployer le site ulab (exemple : bali-bdd-1)"
+	echo -e " "
+	echo -e "Note: l'hôte doit pouvoir être accessible par l'hôte ansible via clé privée, et être renseigné dans le fichier /etc/ansible/hosts  "
+	exit 0
+fi
+
+ANSIBLE_PLAYBOOK="/etc/ansible/playbooks/deploy_ulab_website.yaml"
+ANSIBLE_INVENTORY="/etc/ansible/hosts"
+
+#Running playbook with params
+ansible-playbook -i $ANSIBLE_INVENTORY $ANSIBLE_PLAYBOOK --limit $HOST

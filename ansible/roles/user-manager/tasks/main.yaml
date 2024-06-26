@@ -1,0 +1,13 @@
+---
+- name: Include user creation
+  include_tasks: 
+    file: add_user.yaml
+  when: user_action == 'create'
+- name: Include user deletion
+  include_tasks:
+    file: delete_user.yaml
+  when: user_action == 'remove'
+- name: Update user password
+  include_tasks: 
+    file: update_user.yaml
+  when: user_action == 'update'

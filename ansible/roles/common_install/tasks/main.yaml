@@ -1,0 +1,33 @@
+---
+- name: Include zabbix agent installation
+  include_tasks: 
+    file: deploy_zabbix_agent.yaml
+  when: component == 'zabbix-agent'
+- name: Include CA certificates deployment 
+  include_tasks:
+    file: deploy_ca_certificates.yaml
+  when: component == 'ca-certificates'
+- name: Include Rsyslog client configuration
+  include_tasks: 
+    file: deploy_rsyslog_conf.yaml
+  when: component == 'rsyslog-client'
+- name: Include NTP client configuration
+  include_tasks: 
+    file: deploy_ntp_conf.yaml
+  when: component == 'ntp-client'
+- name: Include Fail2ban configuration
+  include_tasks:
+    file: deploy_fail2ban_conf.yaml
+  when: component == 'fail2ban-client'
+- name: Include Ulab website deployment
+  include_tasks:
+    file: deploy_ulab_website.yaml
+  when: component == 'ulab-website'
+- name: Include VMWare Tools installation
+  include_tasks:
+    file: install_vm_tools.yaml
+  when: component == 'vm-tools'
+- name: Include SSH Server configuration
+  include_tasks:
+    file: deploy_ssh_conf.yaml
+  when: component == 'ssh'

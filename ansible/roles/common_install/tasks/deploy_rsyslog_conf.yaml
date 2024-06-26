@@ -1,0 +1,32 @@
+- name: Install Rsyslog
+  ansible.builtin.dnf:
+    name: 
+      - rsyslog
+      - rsyslog-logrotate
+      - gnutls
+      - rsyslog-gnutls
+    state: latest 
+  become: true
+- name: Create directory rsyslog-keys
+  ansible.builtin.file: 
+    path: /etc/rsyslog-keys
+    state: directory 
+    owner: root
+  become: true
+- name: Copy CA chain file on the remote machine
+  ansible.builtin.copy:
+    src: ca-chain.crt
+    dest: /etc/rsyslog-keys/ca-chain.crt
+    force: true
+  become: true
+- name: Copy Rsyslog configuration file on the remote machine
+  ansible.builtin.template:
+    src: log-client.conf.j2
+    dest: /etc/rsyslog.d/log-client.conf
+  become: true
+- name: Restart Rsyslog service
+  ansible.builtin.service:
+    name: rsyslog
+    state: restarted
+    enabled: yes
+  become: true

@@ -1,0 +1,14 @@
+- name: Install VMware tools
+  ansible.builtin.dnf:
+    name: open-vm-tools
+    state: latest 
+  become: true
+        #  - name: Edit configuration file
+        #    ansible.builtin.shell: 
+        #      cmd: echo -e "[guestinfo]\r\nprimary-nics=ens*" > /etc/vmware-tools/tools.conf
+- name: Reload VMtoolsd Service
+  ansible.builtin.systemd_service:
+    state: restarted
+    enabled: true
+    name: vmtoolsd
+  become: true

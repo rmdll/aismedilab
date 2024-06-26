@@ -1,0 +1,8 @@
+---
+- hosts: database
+  remote_user: ansible_user
+  gather_facts: no
+  vars:
+    component: ulab
+  roles:
+    - role: save

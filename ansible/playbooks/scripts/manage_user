@@ -1,0 +1,64 @@
+#!/bin/bash
+
+ACTION=$1
+HOST=$2
+USERNAME=$3
+PASSWORD="$4"
+
+if [ -z $5 ]; then
+        REMOTE_USER="root"
+else
+        REMOTE_USER="$5"
+fi
+
+if [ -z $ACTION ]; then
+	echo -e "Action vide"
+	echo -e "Vous pouvez afficher la commande d'aide à l'aide du paramètre -h ou --help"
+	exit 1
+elif [ -z $HOST ]; then
+	echo -e "Host vide"
+	echo -e "Vous pouvez afficher la commande d'aide à l'aide du paramètre -h ou --help"
+	exit 1
+elif [ -z $USERNAME ]; then
+	echo -e "Username vide"
+	echo -e "Vous pouvez afficher la commande d'aide à l'aide du paramètre -h ou --help"
+	exit 1
+elif [ -z $PASSWORD ]; then
+	echo -e "Password vide"
+	echo -e "Vous pouvez afficher la commande d'aide à l'aide du paramètre -h ou --help"
+	exit 1
+elif [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+	echo -e "Ce script sert au déploiement d'un utilisateur sur les hôtes Linux Rocky par l'intermédiaire d'Ansible"
+	echo -e "Utilisation du script : "
+	echo -e "Arg 1 = action (create, delete, update)"
+	echo -e "Arg 2 = host"
+	echo -e "Arg 3 = User à créer"
+	echo -e "Arg 4 = Mot de passe"
+	echo -e "Arg 5 = Utilisateur distant"
+	echo -e " "
+	echo -e "Note: l'hôte doit pouvoir être accessible par l'hôte ansible via clé privée, et être renseigné dans le fichier /etc/ansible/hosts  "
+	exit 0
+fi
+
+ANSIBLE_PLAYBOOK="/etc/ansible/playbooks/manage_user.yaml"
+ANSIBLE_INVENTORY="/etc/ansible/hosts"
+
+echo -e "P@ssw0rd" > vault_pass
+
+if [ "$ACTION" == "create" ]; then
+
+	#Running playbook with params
+	ansible-playbook $ANSIBLE_PLAYBOOK -u $REMOTE_USER -e "username=$USERNAME user_action=create" --vault-password-file vault_pass --limit $HOST
+
+elif [ "$ACTION" = "delete" ]; then
+        #Running playbook with params
+        ansible-playbook $ANSIBLE_PLAYBOOK -u $REMOTE_USER -e "username=$USERNAME user_action=remove" --vault-password-file vault_pass --limit $HOST
+
+elif [ "$ACTION" = "update" ]; then
+        #Running playbook with params
+        ansible-playbook $ANSIBLE_PLAYBOOK -u $REMOTE_USER -e "username=$USERNAME user_action=update" --vault-password-file vault_pass --limit $HOST
+else
+	echo -e "Action non reconnue"
+fi
+
+rm -f vault_pass

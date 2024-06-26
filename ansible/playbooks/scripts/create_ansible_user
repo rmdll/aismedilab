@@ -1,0 +1,25 @@
+#!/bin/bash
+
+HOST=$1
+
+if [ -z $HOST ]; then
+	echo -e "Host vide"
+	echo -e "Vous pouvez afficher la commande d'aide à l'aide du paramètre -h ou --help"
+	exit 1
+elif [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+	echo -e "Ce script sert au déploiement de Chronyd sur les hôtes Linux Rocky par l'intermédiaire d'Ansible"
+	echo -e "Utilisation du script : "
+	echo -e "Arg 1 = hôte sur lequel déployer Chronyd (exemple : bali-bdd-1)"
+	echo -e " "
+	echo -e "Note: l'hôte doit pouvoir être accessible par l'hôte ansible via clé privée, et être renseigné dans le fichier /etc/ansible/hosts  "
+	exit 0
+fi
+
+ANSIBLE_PLAYBOOK="/etc/ansible/playbooks/manage_user.yaml"
+ANSIBLE_INVENTORY="/etc/ansible/hosts"
+
+echo -e "P@ssw0rd" > vault_pass
+#Running playbook with params
+ansible-playbook $ANSIBLE_PLAYBOOK -e "username=ansible_user user_action=create" --vault-password-file vault_pass --limit $HOST
+
+rm -f vault_pass

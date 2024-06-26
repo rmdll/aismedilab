@@ -1,0 +1,55 @@
+#!/bin/bash 
+
+HOST=$1
+
+if [ -z $HOST ]; then
+	echo -e "Host vide"
+	echo -e "Vous pouvez afficher la commande d'aide à l'aide du paramètre -h ou --help"
+	exit 1
+elif [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+	echo -e "Ce script sert au déploiement de l'agent Zabbix sur les hôtes Linux Rocky par l'intermédiaire d'Ansible"
+	echo -e "Utilisation du script : "
+	echo -e "Arg 1 = hôte sur lequel déployer l'agent zabbix (exemple : bali-bdd-1)"
+	echo -e " "
+	echo -e "Note: l'hôte doit pouvoir être accessible par l'hôte ansible via clé privée, et être renseigné dans le fichier /etc/ansible/hosts  "
+	exit 0
+fi
+
+ANSIBLE_PLAYBOOK="/etc/ansible/playbooks/deploy_zabbix_agent.yaml"
+ANSIBLE_INVENTORY="/etc/ansible/hosts"
+
+PSK_FILE="/etc/ansible/playbooks/vars/zabbix_psk"
+PSK_ID_FILE="/etc/ansible/playbooks/vars/zabbix_psk_id"
+PSK_ID=$(cat $PSK_ID_FILE)
+PSK_ID_NEW=$(($PSK_ID+1))
+
+echo $PSK_ID_NEW > $PSK_ID_FILE
+
+PSK_ID_CHARS_LEN=$(wc -m /etc/ansible/playbooks/vars/zabbix_psk_id |cut -d" " -f1)
+
+if [ $PSK_ID_CHARS_LEN == "2" ]; then
+	PSK_ID_FULL="00${PSK_ID_NEW}"
+elif [ $PSK_ID_CHARS_LEN == "3" ]; then
+	PSK_ID_FULL="0${PSK_ID_NEW}"
+elif [ $PSK_ID_CHARS_LEN == "4" ]; then
+	PSK_ID_FULL="${PSK_ID_NEW}"
+else
+	echo "PSK ID out of range"
+	exit 1
+fi
+
+openssl rand -hex 32 > $PSK_FILE
+PSK=$(cat $PSK_FILE)
+
+IP=$(cat /etc/ansible/hosts |grep -i $HOST |tail -n 1 |cut -d"=" -f2)
+#Running playbook with params
+ansible-playbook -i $ANSIBLE_INVENTORY -e "psk_id=$PSK_ID_FULL psk=$PSK" $ANSIBLE_PLAYBOOK --limit $HOST
+
+cp data.json data_${HOST}.json
+
+sed -i "s/__HOST__/${HOST}/g" data_${HOST}.json
+sed -i "s/__PSK__/${PSK}/g" data_${HOST}.json
+sed -i "s/__PSK_ID_FULL__/${PSK_ID_FULL}/g" data_${HOST}.json
+sed -i "s/__IP__/${IP}/g" data_${HOST}.json
+curl --insecure --header "Content-Type: application/json-rpc"    --header "Authorization: Bearer 944d4dd3566c7c82633abd332cf57234a4c0da3ae9d35e4deeac81194e17b2e7"   --request POST   --data @data_${HOST}.json https://zabbix.bali.local/api_jsonrpc.php
+rm -f data_${HOST}.json

@@ -1,0 +1,52 @@
+- name: Install Epel Repo
+  ansible.builtin.dnf:
+    name: epel-release
+    state: latest 
+  become: true
+- name: Exclude zabbix packages from Epel Repo
+  ansible.builtin.shell: 
+    cmd: if [ -f /etc/yum.repos.d/epel.repo ]; then sed -i '2i excludepkgs=zabbix*' /etc/yum.repos.d/epel.repo; fi
+  become: true
+- name: Install Zabbix Repo
+  ansible.builtin.shell: 
+    cmd: rpm -Uvh https://repo.zabbix.com/zabbix/6.4/rhel/9/x86_64/zabbix-release-6.4-1.el9.noarch.rpm && dnf clean all 
+  register: result
+  failed_when: '"resolve zabbix" in result.stdout'
+  become: true
+- name: Install Zabbix Agent 
+  ansible.builtin.dnf:
+    name: 
+      - zabbix-agent2
+      - zabbix-agent2-plugin-*
+    state: latest
+  become: true
+- name: Add PSK File 
+  ansible.builtin.shell: 
+    cmd: mkdir -p /home/zabbix/ && echo "{{ psk }}" > /home/zabbix/zabbix_agentd.psk && chown -R zabbix:zabbix /home/zabbix/ && chmod 750 /home/zabbix/zabbix_agentd.psk
+  become: true
+- name: Edit PSK Zabbix Agent Configuration 
+  ansible.builtin.shell: 
+    cmd: sed -i "s/# TLSConnect=unencrypted/TLSConnect=psk/g" /etc/zabbix/zabbix_agent2.conf && sed -i "s/# TLSAccept=unencrypted/TLSAccept=psk/g" /etc/zabbix/zabbix_agent2.conf && sed -i "s/# TLSPSKFile=/TLSPSKFile=\/home\/zabbix\/zabbix_agentd.psk/g" /etc/zabbix/zabbix_agent2.conf && sed -i "s/^.*TLSPSKIdentity=.*/TLSPSKIdentity=PSK {{ psk_id }}/g" /etc/zabbix/zabbix_agent2.conf
+  become: true
+- name: Edit Zabbix Server Configuration
+  ansible.builtin.shell: 
+    cmd: sed -i "s/Server=127.0.0.1/Server={{ monitoringserver }}/g" /etc/zabbix/zabbix_agent2.conf && sed -i "s/ServerActive=127.0.0.1/ServerActive={{ monitoringserver }}/g" /etc/zabbix/zabbix_agent2.conf
+  become: true
+- name : Open TCP Port 10050 on Host
+  ansible.posix.firewalld:
+    port: 10050/tcp
+    permanent: true 
+    state: enabled
+  become: true
+- name: Reload Firewalld Service
+  ansible.builtin.systemd_service:
+    state: reloaded
+    enabled: true
+    name: firewalld
+  become: true
+- name: Restart Zabbix-agent2 Service
+  ansible.builtin.systemd_service:
+    state: restarted
+    enabled: true
+    name: zabbix-agent2
+  become: true

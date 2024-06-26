@@ -1,0 +1,96 @@
+- name: Install Epel Repo
+  ansible.builtin.dnf:
+    name: epel-release
+    state: latest
+  become: true
+- name: Install nginx stack 
+  ansible.builtin.dnf:
+    name: 
+      - nginx
+      - php-fpm
+      - php-mysqlnd
+    state: latest
+  become: true
+- name: Copy Ulab Website on web server
+  ansible.builtin.copy:
+    src: ulab.bali.local_website.tgz
+    dest: /root/
+    force: true
+  become: true
+
+- name: Copy Ulab certificates on web server
+  ansible.builtin.copy:
+    src: ulab.bali.local_certs/ulab.bali.local.cert.pem
+    dest: /etc/pki/tls/certs/
+    force: true
+  become: true
+
+- name: Copy Ulab private key on web server
+  ansible.builtin.copy:
+    src: ulab.bali.local_certs/ulab.bali.local.key.pem
+    dest: /etc/pki/tls/private/
+    force: true
+  become: true
+
+- name: Copy Ulab nginx configuration on web server
+  ansible.builtin.template:
+    src: ulab.bali.local.conf.j2
+    dest: /etc/nginx/conf.d/
+  become: true
+
+- name: Restrict rights on private key file
+  ansible.builtin.file: 
+    path: /etc/pki/tls/private/ulab.bali.local.key.pem
+    owner: root
+    group: root
+    mode: '0700'
+  become: true
+- name: Deploy Website on Web Host
+  ansible.builtin.shell:
+    cmd: tar xvfz /root/ulab.bali.local_website.tgz -C /var/www/
+  become: true
+- name : Make it accessible for nginx
+  ansible.builtin.file:
+    path: /var/www/ulab.bali.local/
+    owner: nginx
+    group: nginx
+    recurse: yes
+  become: true
+- name : Open services HTTPS on Host
+  ansible.posix.firewalld:
+    service: https
+    permanent: true 
+    state: enabled
+  become: true
+- name : Open services HTTP on Host
+  ansible.posix.firewalld:
+    service: http
+    permanent: true 
+    state: enabled
+  become: true
+- name: Reload Firewalld Service
+  ansible.builtin.systemd_service:
+    state: reloaded
+    enabled: true
+    name: firewalld
+  become: true
+- name : Disable SELinux
+  ansible.posix.selinux:
+    state: disabled
+  become: true
+- name: Restart nginx Services
+  ansible.builtin.systemd_service:
+    state: restarted
+    enabled: true
+    name: nginx
+  become: true
+- name: Restart php-fpm Services
+  ansible.builtin.systemd_service:
+    state: restarted
+    enabled: true
+    name: php-fpm
+  become: true
+- name: Reboot machine
+  ansible.builtin.reboot:
+    msg: "Rebooting machine by Ansible"
+  become: true

@@ -1,0 +1,5 @@
+---
+- name: Include ulab database save
+  include_tasks: 
+    file: save_ulab_db.yaml
+  when: component == 'ulab'

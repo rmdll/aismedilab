@@ -1,0 +1,9 @@
+# certificate files
+$DefaultNetStreamDriverCAFile /etc/rsyslog-keys/ca-chain.crt
+
+# make gtls driver the default
+$DefaultNetStreamDriver gtls
+$ActionSendStreamDriverMode 1	# run driver in TLS-only mode
+$ActionSendStreamDriverAuthMode anon
+
+*.*     @@(z9){{ logserver }}:6514		# forward everything to remote server

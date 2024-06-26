@@ -1,0 +1,30 @@
+#!/bin/bash -x
+
+ACTION=$1
+HOST="fortigate"
+
+if [ -z $ACTION ]; then
+	echo -e "Action vide"
+	echo -e "Vous pouvez afficher la commande d'aide à l'aide du paramètre -h ou --help"
+	exit 1
+elif [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+	echo -e "Ce script sert au déploiement d'un utilisateur sur les hôtes Linux Rocky par l'intermédiaire d'Ansible"
+	echo -e "Utilisation du script : "
+	echo -e "Arg 1 = action (create, delete, update)"
+	echo -e "Arg 2 = host"
+	echo -e "Arg 3 = User à créer"
+	echo -e "Arg 4 = Mot de passe"
+	echo -e "Arg 5 = Utilisateur distant"
+	echo -e " "
+	echo -e "Note: l'hôte doit pouvoir être accessible par l'hôte ansible via clé privée, et être renseigné dans le fichier /etc/ansible/hosts  "
+	exit 0
+fi
+
+ANSIBLE_PLAYBOOK="/etc/ansible/playbooks/manage_fortigate.yaml"
+ANSIBLE_INVENTORY="/etc/ansible/hosts"
+
+if [ "$ACTION" == "add-vlan" ]; then
+	read -p "Entrez l'ID de VLAN à créer : " VLAN_ID
+	read -p "Entrez l'intitulé du VLAN à créer : " VLAN_NAME
+	ansible-playbook $ANSIBLE_PLAYBOOK -vvvvv -e "action=add-vlan vlan_id=$VLAN_ID vlan_name=$VLAN_NAME" 
+fi

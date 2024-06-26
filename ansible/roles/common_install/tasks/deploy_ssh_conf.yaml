@@ -1,0 +1,21 @@
+- name: Copy SSH configuration file on the remote machine
+  ansible.builtin.template:
+    src: sshd_config.j2
+    dest: /etc/ssh/sshd_config
+  become: true
+- name: Remove PermitRootLogin Policy from SSHD configuration files
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config.d/01-permitrootlogin.conf
+    state: absent
+  become: true
+- name: Remove root account authorized keys
+  ansible.builtin.file:
+    path: /root/.ssh/authorized_keys
+    state: absent
+  become: true
+- name: Restart SSHD service
+  ansible.builtin.service:
+    name: sshd
+    state: reloaded
+    enabled: yes
+  become: true

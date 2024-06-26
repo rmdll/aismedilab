@@ -1,0 +1,19 @@
+- name: Install Chrony
+  ansible.builtin.dnf:
+    name: chrony 
+    state: latest 
+  become: true
+- name: Configure NTP server
+  ansible.builtin.shell: 
+    cmd: sed -i "s/pool 2.rocky.pool.ntp.org iburst/server {{ ntpserver }}/g" /etc/chrony.conf
+  become: true
+- name: Configure timezone 
+  ansible.builtin.shell: 
+    cmd: timedatectl set-timezone Europe/Paris
+  become: true
+- name: Restart chrony Service
+  ansible.builtin.systemd_service:
+    state: restarted
+    enabled: true
+    name: chronyd
+  become: true

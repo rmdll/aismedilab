@@ -1,0 +1,31 @@
+#!/bin/bash
+HOST=${1}.bali.local
+
+if [ -z $HOST ]; then
+        echo -e "Host vide"
+        echo -e "Vous pouvez afficher la commande d'aide à l'aide du paramètre -h ou --help"
+        exit 1
+elif [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+        echo -e "Ce script sert au déploiement de serveurs WEB sur les hôtes Linux Rocky par l'intermédiaire d'Ansible"
+        echo -e "Utilisation du script : "
+        echo -e "Arg 1 = hôte sur lequel déployer la configuration initiale (exemple : bali-bdd-1)"
+        echo -e " "
+        echo -e "Note: l'hôte doit pouvoir être accessible par l'hôte ansible via clé privée, et être renseigné dans le fichier /etc/ansible/hosts  "
+        exit 0
+fi
+echo -e "Get de l'identifiant Zabbix"
+
+cp data_get.json data_get_${HOST}.json
+
+sed -i "s/__HOST__/${HOST}/g" data_get_${HOST}.json
+
+HOST_ID=$(curl -s --insecure --header "Content-Type: application/json-rpc"    --header "Authorization: Bearer 944d4dd3566c7c82633abd332cf57234a4c0da3ae9d35e4deeac81194e17b2e7"   --request POST   --data @data_get_${HOST}.json https://zabbix.bali.local/api_jsonrpc.php |cut -d"{" -f3 |cut -d":" -f 2 |cut -d "," -f 1 |cut -d'"' -f 2)
+rm -f data_get_${HOST}.json
+
+echo -e "Suppression de l'host zabbix"
+cp data_remove.json data_remove_${HOST}.json
+
+sed -i "s/__HOST_ID__/${HOST_ID}/g" data_remove_${HOST}.json
+
+curl -s --insecure --header "Content-Type: application/json-rpc"    --header "Authorization: Bearer 944d4dd3566c7c82633abd332cf57234a4c0da3ae9d35e4deeac81194e17b2e7"   --request POST   --data @data_remove_${HOST}.json https://zabbix.bali.local/api_jsonrpc.php
+rm -f data_remove_${HOST}.json

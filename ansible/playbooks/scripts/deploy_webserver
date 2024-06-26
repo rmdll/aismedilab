@@ -1,0 +1,23 @@
+#!/bin/bash
+HOST=$1
+IP=$2
+
+if [ -z $HOST ]; then
+        echo -e "Host vide"
+        echo -e "Vous pouvez afficher la commande d'aide à l'aide du paramètre -h ou --help"
+        exit 1
+elif [ -z $IP ]; then
+        echo -e "IP vide"
+        echo -e "Vous pouvez afficher la commande d'aide à l'aide du paramètre -h ou --help"
+        exit 1
+elif [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+        echo -e "Ce script sert au déploiement de serveurs WEB sur les hôtes Linux Rocky par l'intermédiaire d'Ansible"
+        echo -e "Utilisation du script : "
+        echo -e "Arg 1 = hôte sur lequel déployer la configuration initiale (exemple : bali-bdd-1)"
+        echo -e " "
+        echo -e "Note: l'hôte doit pouvoir être accessible par l'hôte ansible via clé privée, et être renseigné dans le fichier /etc/ansible/hosts  "
+        exit 0
+fi
+
+./init_config $HOST $IP
+./deploy_ulab_website $HOST

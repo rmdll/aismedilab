@@ -1,0 +1,10 @@
+[sshd]
+enabled = true
+filter = sshd
+port = {{ sshport }}
+logpath = /var/log/secure
+maxretry = 5
+banaction = nftables
+findtime = 30m
+bantime = 12h
+ignoreip = 127.0.0.1/8 172.16.28.1/32

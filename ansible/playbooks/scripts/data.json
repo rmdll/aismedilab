@@ -1,0 +1,32 @@
+{
+           "jsonrpc": "2.0",
+           "method": "host.create",
+           "params": {
+               "host": "__HOST__.bali.local",
+               "interfaces": [
+                   {
+                       "type": 1,
+                       "ip": "__IP__",
+                       "dns": "__HOST__.bali.local",
+                       "port": "10050",
+                       "useip": 1,
+                       "main": 1
+                   }
+               ],
+               "groups": [
+                   {
+                       "groupid": "2"
+                   }
+               ],
+               "templates": [
+                   {
+                       "templateid": "10001"
+                   }
+               ],	    
+               "tls_accept": 2,
+               "tls_connect": 2,
+               "tls_psk_identity": "PSK __PSK_ID_FULL__",
+               "tls_psk": "__PSK__"
+           },
+           "id": 1
+       } 

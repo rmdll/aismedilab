@@ -1,0 +1,6 @@
+vdom: "root"
+vlan_network_base: "172.16"
+vlan_network_gateway: "253"
+vlan_netmask: "255.255.255.0"
+vlan_netmask_cidr: "24"
+zone_name: "BALI_INTERNAL_NETWORK"

@@ -1,0 +1,5 @@
+---
+- name: Create VLAN on Fortigate
+  include_tasks: 
+    file: add_vlan.yaml
+  when: action == 'add-vlan'

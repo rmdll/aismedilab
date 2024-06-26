@@ -1,0 +1,16 @@
+- name: Copy root ca file on the remote machine
+  ansible.builtin.copy:
+    src: ca.crt
+    dest: "/etc/pki/ca-trust/source/anchors/ca.crt"
+    force: true
+  become: true
+- name: Copy intermediate ca file on the remote machine
+  ansible.builtin.copy:
+    src: intermediate.crt
+    dest: "/etc/pki/ca-trust/source/anchors/intermediate.crt"
+    force: true
+  become: true
+- name: Update CA Certificates Database
+  ansible.builtin.shell: 
+    cmd: update-ca-trust
+  become: true

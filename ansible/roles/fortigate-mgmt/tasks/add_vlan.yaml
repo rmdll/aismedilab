@@ -1,0 +1,43 @@
+# Créer l'interface VLAN
+- name: Créer l'interface VLAN {{ vlan_name }}
+  fortinet.fortios.fortios_system_interface:
+    #type: "vlan"
+    vdom: "{{ vdom }}"
+    state: present
+      #device_identification_enabled: true
+    system_interface:
+
+      name: "VLAN{{ vlan_id }}"
+      vlan_protocol: "8021q"
+      vlanid: "{{ vlan_id }}"
+      ip: "{{ vlan_network_base }}.{{ vlan_id }}.{{ vlan_network_gateway }} {{ vlan_netmask }}"
+      allowaccess: ping
+      role: lan
+      interface: "internal"
+      device_identification: "enable"
+        #state: present
+
+      ### Associer l'interface VLAN à la zone
+      ##- name: Associer l'interface VLAN {{ vlan_id }} à la zone {{ zone_name }}
+      ##  fortios_firewall_zone_interface:
+      ##    vdom: "{{ vdom }}"
+      ##    zone: "{{ zone_name }}"
+      ##    interface: "VLAN{{ vlan_id }}"
+      ##    state: present
+      ##
+      ### Créer l'objet d'adresse
+      ##- name: Créer l'objet d'adresse VLAN{{ vlan_id }}_{{ vlan_name }}
+      ##  fortios_address_object:
+      ##    vdom: "{{ vdom }}"
+      ##    name: "VLAN{{ vlan_id }}_{{ vlan_name }}"
+      ##    type: ip
+      ##    subnet: "172.16.{{ vlan_id }}.0/24"
+      ##    state: present
+
+      #    # Ajouter l'objet d'adresse au groupe d'adresses
+      #    - name: Ajouter l'objet d'adresse "{{ address_object_name }}" au groupe d'adresses "{{ address_group_name }}"
+      #      fortios_address_group_member:
+      #        vdom: "{{ vdom }}"
+      #        group: "{{ address_group_name }}"
+      #        member: "{{ address_object_name }}"
+      #        state: present

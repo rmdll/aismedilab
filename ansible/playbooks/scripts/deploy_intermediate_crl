@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+	echo -e "Ce script sert au déploiement des certificats sur les hôtes Rocky Linux"
+	echo -e "Utilisation du script : "
+	echo -e "Arg 1 = hôte sur lequel déployer les certificats (exemple : bali-bdd-1)"
+	echo -e " "
+	echo -e "Note: l'hôte doit pouvoir être accessible par l'hôte ansible via clé privée, et être renseigné dans le fichier /etc/ansible/hosts  "
+	exit 0
+fi
+
+ANSIBLE_PLAYBOOK="/etc/ansible/playbooks/templates/deploy_intermediate_crl.yaml"
+ANSIBLE_INVENTORY="/etc/ansible/hosts"
+
+INTERMEDIATE_CRL_REMOTE="/root/crl/intermediate.crl.pem"
+INTERMEDIATE_CRL_LOCAL="/etc/ansible/playbooks/resources/intermediate.crl.pem"
+WEBDIR_FOR_CRL="/var/www/crl.bali.local/intermediate.crl.pem"
+HOST_USER="root"
+DOMAIN_EXT="bali.local"
+
+scp root@bali-pki-1.bali.local:${INTERMEDIATE_CRL_REMOTE} ${INTERMEDIATE_CRL_LOCAL}
+
+#Running playbook with params
+ansible-playbook -i $ANSIBLE_INVENTORY -e "intermediate_crl_file_src=${INTERMEDIATE_CRL_REMOTE} intermediate_crl_file_dst=${INTERMEDIATE_CRL_LOCAL} web_intermediate_crl_file=${WEBDIR_FOR_CRL}" $ANSIBLE_PLAYBOOK 

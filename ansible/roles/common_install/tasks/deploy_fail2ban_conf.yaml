@@ -1,0 +1,26 @@
+- name: Install Epel Repo
+  ansible.builtin.dnf:
+    name: epel-release
+    state: latest
+  become: true
+- name: Install Fail2Ban
+  ansible.builtin.dnf:
+    name: fail2ban
+    state: latest 
+  become: true
+- name: Copy jail sshd configuration file on the remote machine
+  ansible.builtin.template:
+    src: f2b-jail-sshd.conf.j2
+    dest: /etc/fail2ban/jail.d/10-sshd.conf
+  become: true
+- name: Copy jail mysqld configuration file on the remote machine
+  ansible.builtin.template:
+    src: f2b-jail-mysqld.conf.j2
+    dest: /etc/fail2ban/jail.d/20-mysqld.conf
+  become: true
+- name: Restart Fail2Ban service
+  ansible.builtin.service:
+    name: fail2ban
+    state: restarted
+    enabled: yes
+  become: true

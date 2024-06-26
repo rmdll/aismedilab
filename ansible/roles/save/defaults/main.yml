@@ -1,0 +1,3 @@
+logserver: bali-splunk-1.bali.local
+ntpserver: bali-ntp-1.bali.local
+monitoringserver: bali-zabbix-1.bali.local

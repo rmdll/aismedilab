@@ -1,0 +1,8 @@
+---
+- hosts: linux-rocky
+  remote_user: ansible_user
+  gather_facts: no
+  vars:
+    component: vm-tools
+  roles:
+    - role: common_install

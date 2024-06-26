@@ -1,0 +1,6 @@
+---
+- hosts: fortigate
+  remote_user: ansible_user
+  connection: fortinet.fortios.fortios
+  roles:
+    - role: '/etc/ansible/roles/fortigate-mgmt'

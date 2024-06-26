@@ -1,0 +1,33 @@
+- name: Create scripts directory
+  ansible.builtin.file: 
+    path: /scripts
+    state: directory 
+    owner: ansible_user
+    group: ansible_user
+    mode: '0640'
+  become: true
+- name: Create save directory
+  ansible.builtin.file: 
+    path: /mnt/bali-nas/save
+    state: directory 
+    owner: ansible_user
+    group: ansible_user
+    mode: '0640'
+  become: true
+- name: Copy save script on remote machine
+  ansible.builtin.copy:
+    src: ulab_db_save.sh 
+    dest: /scripts/ulab_db_save.sh
+    force: true
+  become: true
+- name: Give file execution permission
+  ansible.builtin.file:
+    path: /scripts/ulab_db_save.sh
+    owner: ansible_user
+    group: ansible_user
+    mode: '0750'
+  become: true
+- name: Execute the save script on the remote machine
+  ansible.builtin.shell:
+    cmd: pushd /scripts/ && ./ulab_db_save.sh ul4bs4v3p@ssw0rd Bali2024! && popd
+  become: true

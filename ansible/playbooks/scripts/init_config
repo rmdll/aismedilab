@@ -1,0 +1,36 @@
+#!/bin/bash
+HOST=$1
+IP=$2
+
+if [ -z $HOST ]; then
+        echo -e "Host vide"
+        echo -e "Vous pouvez afficher la commande d'aide à l'aide du paramètre -h ou --help"
+        exit 1
+elif [ -z $IP ]; then
+        echo -e "IP vide"
+        echo -e "Vous pouvez afficher la commande d'aide à l'aide du paramètre -h ou --help"
+        exit 1
+elif [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+        echo -e "Ce script sert au déploiement de la configuration initiale sur les hôtes Linux Rocky par l'intermédiaire d'Ansible"
+        echo -e "Utilisation du script : "
+        echo -e "Arg 1 = hôte sur lequel déployer la configuration initiale (exemple : bali-bdd-1)"
+        echo -e " "
+        echo -e "Note: l'hôte doit pouvoir être accessible par l'hôte ansible via clé privée, et être renseigné dans le fichier /etc/ansible/hosts  "
+        exit 0
+fi
+
+./manage_inventory $HOST $IP add
+./manage_user create $HOST ansible_user P@ssw0rd root
+./manage_user create $HOST remi.dalleu P@ssw0rd ansible_user
+./manage_user create $HOST theo.degrou P@ssw0rd ansible_user
+./manage_user create $HOST vincent.luchez P@ssw0rd ansible_user
+./manage_user create $HOST sebastien.szymura P@ssw0rd ansible_user
+./manage_user create $HOST zabbix_user P@ssw0rd ansible_user
+./manage_user create $HOST bastion_user P@ssw0rd ansible_user
+./deploy_ssh_conf $HOST
+./deploy_ntp_conf $HOST
+./deploy_ca_certificates $HOST
+./deploy_rsyslog_conf $HOST
+./deploy_fail2ban_conf $HOST
+./remove_zabbix_agent $HOST
+./deploy_zabbix_agent $HOST
