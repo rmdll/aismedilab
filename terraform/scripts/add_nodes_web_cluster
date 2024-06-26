@@ -1,0 +1,5 @@
+#!/bin/bash
+
+pushd /home/terraform/terraform-web-cluster/
+terraform apply -auto-approve
+popd

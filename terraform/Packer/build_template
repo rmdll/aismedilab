@@ -1,0 +1,18 @@
+#!/bin/bash
+set -x
+#Script de construction de template
+#Renseigner en \$1 le nom du répertoire qui contient les fichiers à build
+
+PACKER_BIN="/usr/bin/packer"
+PACKER_BUILD_FILE="main.json.pkr.hcl"
+WORKDIR="/home/terraform/Packer/$1"
+pushd $WORKDIR
+
+#Expose ks.cfg file
+python -m http.server 9000 &
+
+#Build the template
+nohup $PACKER_BIN build ${PACKER_BUILD_FILE} &
+
+echo -e "Template en cours de construction"
+echo -e "Effectuez la commande suivante pour suivre la construction : tail -n 50 -f nohup"

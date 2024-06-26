@@ -1,0 +1,55 @@
+{
+  "builders": [
+    {
+      "type": "vsphere-iso",
+
+      "vcenter_server": "vcenter.bali.local",
+      "username": "administrator@vsphere.local",
+      "password": "Bali@2023",
+
+      "datacenter": "BALI",
+      "cluster": "BALI-CLUSTER-1",
+      "datastore": "Data1",
+      "folder": "Templates-RDA",
+
+      "insecure_connection": "true",
+      "vm_name": "Rocky-9.3-Template",
+      "CPUs": "1",
+      "RAM": "2048",
+      "RAM_reserve_all": "false",
+      "firmware": "bios",
+      "guest_os_type": "centos64Guest",
+
+      "boot_order": "disk,cdrom",
+      "boot_wait": "10s",
+
+      "convert_to_template": "true",
+
+      "iso_paths": [
+        "[Data1] ISO/Rocky-9.3-x86_64-minimal.iso"
+      ],
+      "floppy_files": ["ks.cfg"],
+      "boot_command": [
+      "<esc><wait>",
+      "linux ks=hd:fd0:/ks.cfg<enter><wait><enter>"
+       ],
+      "network_adapters": [
+        {
+          "network": "CLIENT"
+        }
+      ],
+
+      "disk_controller_type": "pvscsi",
+
+      "storage": [
+        {
+          "disk_size": "20480",
+          "disk_thin_provisioned": "true"
+        }
+      ],
+
+      "ssh_username": "rocky",
+      "ssh_password": "rocky@Terraform"
+    }
+  ]
+}

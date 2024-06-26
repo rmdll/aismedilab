@@ -1,0 +1,6 @@
+#!/bin/bash
+
+pushd /home/terraform/terraform-web-cluster/
+terraform destroy -auto-approve
+ssh bali-ansible-1.bali.local "pushd /etc/ansible/playbooks/scripts/ && ./remove_webserver bali-web-4"
+popd

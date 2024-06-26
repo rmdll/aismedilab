@@ -1,0 +1,45 @@
+text
+lang fr_FR
+keyboard fr
+timezone Europe/Paris 
+cdrom
+
+zerombr
+clearpart --all --initlabel
+autopart --type=lvm
+bootloader --location=mbr --append="rhgb quiet crashkernel=auto"
+
+network --hostname=rocky --bootproto=dhcp --onboot=yes --activate
+selinux --enforcing
+firewall --enabled --ssh
+skipx
+firstboot --disable
+rootpw temp
+user --name=rocky --groups=wheel --password=rocky@Terraform
+
+%packages
+@base
+@core
+@development
+open-vm-tools
+%end
+
+%post --log=/var/log/ks.post02.log
+#!/bin/bash
+
+#set -x
+#request dhcpd
+echo "rocky        ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers.d/rocky
+dhclient
+# Install VMWare guest tools
+echo "Installing VM Tools..."
+# Install open-vm-tools, required to detect IP when building on ESXi
+dnf install -y open-vm-tools
+echo -e "[guestinfo]\r\nprimary-nics=ens*" > /etc/vmware-tools/tools.conf
+#yum install -y perl
+dnf install -y vim
+
+systemctl enable vmtoolsd
+systemctl restart vmtoolsd
+
+%end
